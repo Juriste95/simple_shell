@@ -28,6 +28,7 @@ int main(void)
 			free_tokens(args);
 			continue;
 		}
+		run_shell();
 		status = execute(args);
 		free(input);
 		free_tokens(args);
@@ -35,8 +36,6 @@ int main(void)
 		/* Set status to 1 to continue the loop */
 		status = 1;
 	} while (status);
-
-	run_shell();
 
 	return (EXIT_SUCCESS);
 }
