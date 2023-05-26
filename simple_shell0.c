@@ -1,64 +1,50 @@
 #include "shell.h"
 
 /**
- * prompt_message - print the default message for user to make input
+ * execute - Execute a command with arguments.
+ * @argv: An array of strings containing the command and its arguments.
  *
- * Return: EXIT_SUCCESS
+ * Return: The exit status of the executed command.
  */
-
-void prompt_message(void)
+int execute(char **argv)
 {
-	printf("$ ");
-}
+	pid_t id;
+	int status = 0;
+	char *cmd_path, *envp[2];
 
-/**
- * execute_command - fork a process to execute the command entered by the user
- * @command: string command entered by user
- * Return: EXIT_SUCCESS
- */
+	if (argv == NULL || *argv == NULL)
+		return (status);
+	if (check_for_builtin(argv))
+		return (status);
 
-void execute_command(char *command)
-{
-	pid_t mypid = fork();
-
-	if (mypid < 0)
+	id = fork();
+	if (id < 0)
 	{
-		perror("Fork failed.\n");
-		exit(1);
+		_puterror("fork");
+		return (1);
 	}
-	else if (mypid == 0)
+	if (id == -1)
+		perror(argv[0]), free_tokens(argv), free_last_input();
+	if (id == 0)
 	{
-		if (execlp(command, command, NULL) == -1)
+		envp[0] = get_path();
+		envp[1] = NULL;
+		cmd_path = NULL;
+		if (argv[0][0] != '/')
+			cmd_path = find_in_path(argv[0]);
+		if (cmd_path == NULL)
+			cmd_path = argv[0];
+		if (execve(cmd_path, argv, envp) == -1)
 		{
-			fprintf(stderr, "Command not found: %s\n", command);
-			exit(1);
+			perror(argv[0]), free_tokens(argv), free_last_input();
+			exit(EXIT_FAILURE);
 		}
 	}
 	else
 	{
-		wait(NULL);
+		do {
+			waitpid(id, &status, WUNTRACED);
+		} while (!WIFEXITED(status) && !WIFSIGNALED(status));
 	}
-
-}
-
-/**
- * run_shell - loop the shell to continue taking command from user
- * Return: EXIT_SUCCESS
- */
-
-void run_shell(void)
-{
-	char command[BUFFER_SIZE];
-
-	while (1)
-	{
-		prompt_message();
-
-		if (fgets(command, BUFFER_SIZE, stdin) == NULL)
-			break;
-
-		command[strcspn(command, "\n")] = '\0';
-
-		execute_command(command);
-	}
+	return (status);
 }
