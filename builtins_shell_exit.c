@@ -1,19 +1,20 @@
 #include "shell.h"
 
 /**
- * shell_env - Prints all the environment variables.
+ * shell_exit - Exit the shell.
+ * @args: Arguments.
  *
- * Return: void.
+ * Return: Nothing.
  */
-int shell_env(void)
+void shell_exit(char **args)
 {
-	int i;
+	int status = 0;
 
-	for (i = 0; environ[i]; i++)
+	if (args[1] != NULL)
 	{
-		_puts(environ[i]);
-		_putchar('\n');
+		status = _atoi(args[1]);
 	}
-
-	return (0);
+	free_tokens(args);
+	free_last_input();
+	exit(status);
 }
