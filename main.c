@@ -28,7 +28,7 @@ int main(void)
 			free_tokens(args);
 			continue;
 		}
-		run_shell();
+
 		status = execute(args);
 		free(input);
 		free_tokens(args);
