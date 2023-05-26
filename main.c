@@ -36,5 +36,7 @@ int main(void)
 		status = 1;
 	} while (status);
 
+	run_shell();
+
 	return (EXIT_SUCCESS);
 }
